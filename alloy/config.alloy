@@ -1,0 +1,16 @@
+local.file_match "system_logs" {
+  path_targets = [
+    {__path__ = "/var/log/*.log", node = "<NODE_NAME>", job = "system", environment = "lab"},
+  ]
+}
+
+loki.source.file "log_scraper" {
+  targets    = local.file_match.system_logs.targets
+  forward_to = [loki.write.endpoint.receiver]
+}
+
+loki.write "endpoint" {
+  endpoint {
+    url = "http://<MONITORING_SERVER_PRIVATE_IP>:3100/loki/api/v1/push"
+  }
+}
